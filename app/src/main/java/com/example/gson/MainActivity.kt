@@ -4,14 +4,19 @@ import android.app.appsearch.GlobalSearchSession
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MicrophoneInfo.Coordinate3F
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.GridLayoutManager
@@ -28,6 +33,7 @@ import java.net.URL
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -119,6 +125,25 @@ class MainActivity : AppCompatActivity(), CellClickListener {
     override fun onCellClickListenet(link: String) {
         copyToClipboard(link)
         Timber.i(link)
+        val intent = Intent(this, PicViewer :: class.java)
+        intent.putExtra("Link", link)
+        startActivityForResult(intent, 1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(data == null) {return}
+        val link = data.getStringExtra("message") as String
+
+        val message = "Картинка добавлена в избранное"
+
+        val v : View = findViewById(R.id.mainLayout)
+        val snackbar = Snackbar.make(v, message, Snackbar.LENGTH_LONG)
+            .setAction("Открыть", View.OnClickListener {
+                val browserInternet = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                startActivity(browserInternet)
+            })
+        snackbar.show()
     }
 }
 
